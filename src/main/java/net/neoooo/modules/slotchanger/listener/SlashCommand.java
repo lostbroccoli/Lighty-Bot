@@ -1,23 +1,21 @@
-package net.ju.modules.slotchange.listener;
+package net.neoooo.modules.slotchanger.listener;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.ju.mongodb.MongoDB_Manager;
+import net.neoooo.modules.slotchanger.SlotChanger;
 
 import java.awt.*;
 import java.util.ArrayList;
 
 public class SlashCommand extends ListenerAdapter {
-
-    private MongoDB_Manager manager = new MongoDB_Manager();
-
+    
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event){
         if(event.getGuild() == null) return;
-        if(!event.getName().equals("slotchange")) return;
+        if(!event.getName().equals(SlotChanger.getSlotchanger().getModulename())) return;
 
         switch (event.getSubcommandName()){
             case "setup":
@@ -25,14 +23,18 @@ public class SlashCommand extends ListenerAdapter {
                     event.reply("Please provide me with a valid channel!").setEphemeral(true).queue();
                     return;
                 }
+                if(!event.getOption("panelchannel").getAsChannel().getType().equals(ChannelType.TEXT)){
+                    event.reply("Please provide me with a valid textchannel!").setEphemeral(true).queue();
+                    return;
+                }
 
                 EmbedBuilder builder = new EmbedBuilder();
-                builder.setTitle(manager.getQuery(event.getGuild().getId()).get("message_title", String.class));
-                builder.setDescription(manager.getQuery(event.getGuild().getId()).get("message_description", String.class));
-                builder.setColor(Color.decode(manager.getQuery(event.getGuild().getId()).get("message_color", String.class)));
-                builder.setFooter(manager.getQuery(event.getGuild().getId()).get("message_footer", String.class));
+                builder.setTitle(SlotChanger.getSlotchanger().getManager().getQuery(event.getGuild().getId(), SlotChanger.getSlotchanger().getModulename()).get("message_title", String.class));
+                builder.setDescription(SlotChanger.getSlotchanger().getManager().getQuery(event.getGuild().getId(), SlotChanger.getSlotchanger().getModulename()).get("message_description", String.class));
+                builder.setColor(Color.decode(SlotChanger.getSlotchanger().getManager().getQuery(event.getGuild().getId(), SlotChanger.getSlotchanger().getModulename()).get("message_color", String.class)));
+                builder.setFooter(SlotChanger.getSlotchanger().getManager().getQuery(event.getGuild().getId(), SlotChanger.getSlotchanger().getModulename()).get("message_footer", String.class));
 
-                manager.updateValue(event.getGuild().getId(), "panelchannel", event.getOption("panelchannel").getAsChannel().getId());
+                SlotChanger.getSlotchanger().getManager().updateValue(event.getGuild().getId(), SlotChanger.getSlotchanger().getModulename(), "panelchannel", event.getOption("panelchannel").getAsChannel().getId());
 
                 event.getGuild().getTextChannelById(event.getOption("panelchannel").getAsChannel().getId()).sendMessageEmbeds(builder.build()).addActionRow(
                         Button.primary("slotchange", "Limit Usercount")
@@ -50,13 +52,13 @@ public class SlashCommand extends ListenerAdapter {
                     return;
                 }
 
-                ArrayList<String> ignored_categories = manager.getQuery(event.getGuild().getId()).get("ignored_categories", ArrayList.class);
+                ArrayList<String> ignored_categories = SlotChanger.getSlotchanger().getManager().getQuery(event.getGuild().getId(), SlotChanger.getSlotchanger().getModulename()).get("ignored_categories", ArrayList.class);
                 if(ignored_categories == null){
                     ignored_categories = new ArrayList<>();
                 }
                 ignored_categories.add(event.getOption("ignored_category").getAsString());
 
-                manager.updateValue(event.getGuild().getId(), "ignored_categories", ignored_categories);
+                SlotChanger.getSlotchanger().getManager().updateValue(event.getGuild().getId(), SlotChanger.getSlotchanger().getModulename(), "ignored_categories", ignored_categories);
                 event.reply("Successful!").setEphemeral(true).queue();
                 break;
 
@@ -71,13 +73,13 @@ public class SlashCommand extends ListenerAdapter {
                     return;
                 }
 
-                ArrayList<String> ignored_channels = manager.getQuery(event.getGuild().getId()).get("ignored_channels", ArrayList.class);
+                ArrayList<String> ignored_channels = SlotChanger.getSlotchanger().getManager().getQuery(event.getGuild().getId(), SlotChanger.getSlotchanger().getModulename()).get("ignored_channels", ArrayList.class);
                 if(ignored_channels == null){
                     ignored_channels = new ArrayList<>();
                 }
                 ignored_channels.add(event.getOption("ignored_channel").getAsString());
 
-                manager.updateValue(event.getGuild().getId(), "ignored_channels", ignored_channels);
+                SlotChanger.getSlotchanger().getManager().updateValue(event.getGuild().getId(), SlotChanger.getSlotchanger().getModulename(), "ignored_channels", ignored_channels);
                 event.reply("Successful!").setEphemeral(true).queue();
                 break;
         }

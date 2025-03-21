@@ -1,4 +1,4 @@
-package net.ju.modules.slotchange.listener;
+package net.neoooo.modules.slotchanger.listener;
 
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -9,6 +9,8 @@ public class ModalInteraction extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(net.dv8tion.jda.api.events.interaction.ModalInteractionEvent event){
+        if(event.getGuild() == null) return;
+
         switch (event.getModalId()){
             case "slotchange":
                 String count = event.getValue("count").getAsString();
